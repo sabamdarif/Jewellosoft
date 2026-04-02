@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*'  # Triggers on version tags like v1.0.0, v1.1.0
+  pull_request:
+    branches:
+      - '**' # Triggers on PRs to any branch
   workflow_dispatch:
 
 jobs:
@@ -59,10 +62,16 @@ jobs:
         run: npm ci
 
       - name: Build & Publish Electron installer
+        if: github.event_name != 'pull_request'
         working-directory: desktop
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build:publish
+
+      - name: Build Electron installer
+        if: github.event_name == 'pull_request'
+        working-directory: desktop
+        run: npm run build
       
       # ── Upload artifacts (backup) ────────────────────────────────
       - name: Upload installer artifact

@@ -6,6 +6,9 @@ from pathlib import Path
 # Provide PyInstaller's Django hook with explicit settings resolution
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
 
+import django
+django.setup()
+
 # Paths
 BACKEND_DIR = Path(__file__).resolve().parent
 RUN_SCRIPT = BACKEND_DIR / "run_waitress.py"

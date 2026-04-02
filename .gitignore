@@ -1,0 +1,89 @@
+# General
+.DS_Store
+*.log
+*.sqlite3
+db.sqlite3
+
+# OS generated files
+Thumbs.db
+.Spotlight-V100
+.Trashes
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+*.env
+
+# IDE / Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Backend (Django/Python)
+__pycache__/
+*.py[cod]
+*$py.class
+backend/.venv/
+.venv/
+venv/
+ENV/
+env/
+backend/media/
+backend/static/
+backend/staticfiles/
+backend/dist/
+backend/build/
+backend/*.spec
+backend/.pytest_cache/
+backend/logs/
+backend/check_utf8.txt
+backend/check_err.txt
+backend/err.txt
+backend/err2.txt
+backend/py_err.txt
+backend/out.txt
+backend/test.txt
+
+# PyInstaller temporary
+build/
+dist/
+*.egg-info/
+
+# Frontend (React/Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Desktop / Electron
+desktop/node_modules/
+desktop/dist/
+desktop/build/
+desktop/out/
+desktop/*.msi
+desktop/*.exe
+
+electron/node_modules/
+electron/dist/
+electron/build/
+
+# Certificates and Keys
+*.pem
+*.cert
+*.crt
+*.key
+*.pfx
+*.p12
+
+# Any config backups
+*.bak
+*.orig

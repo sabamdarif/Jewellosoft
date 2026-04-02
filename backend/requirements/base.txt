@@ -1,0 +1,12 @@
+# Core Django packages
+Django>=6.0,<7.0
+djangorestframework>=3.15
+djangorestframework-simplejwt>=5.4
+django-cors-headers>=4.6
+django-filter>=25.0
+
+# Database
+sqlparse>=0.5
+
+# Production WSGI server
+waitress>=3.0

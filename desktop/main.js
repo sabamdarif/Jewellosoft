@@ -92,7 +92,7 @@ function createWindow() {
     show: false, // Don't show immediately to prevent white screen
     icon: isDev
       ? path.join(__dirname, '../frontend/src/assets/icons/b503ee48-1ece-4256-8ef5-72c1d9f0a8de.png')
-      : path.join(__dirname, 'build/icon.png'),
+      : path.join(__dirname, 'build/icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -128,8 +128,19 @@ function startDjango() {
     log(`Selected Django Port: ${djangoPort}`);
     
     const backendPath = isDev 
-      ? path.join(__dirname, '../backend')
-      : path.join(process.resourcesPath, 'backend');
+      ? path.join(__dirname, '../backend/dist/backend.exe')
+      : path.join(process.resourcesPath, 'backend.exe');
+
+    // FAIL-SAFE: Startup validation
+    if (!fs.existsSync(backendPath)) {
+      log(`BACKEND NOT FOUND AT: ${backendPath}`);
+      dialog.showErrorBox(
+        "Startup Error",
+        "Backend service missing. Please reinstall the application or build the backend executable."
+      );
+      app.quit();
+      return Promise.reject(new Error("Backend missing"));
+    }
 
     // OS environments for Django dynamic routing
     const env = { 
@@ -138,54 +149,31 @@ function startDjango() {
       'JEWELLOSOFT_DATA_PATH': userDataPath
     };
 
-    // Automatic `.venv` detection
-    let pythonExecutable = 'python';
-    
-    // Windows virtual environment path
-    const winVenvPath = path.join(backendPath, '.venv', 'Scripts', 'python.exe');
-    // Unix/Mac virtual environment path
-    const unixVenvPath = path.join(backendPath, '.venv', 'bin', 'python');
+    log(`Starting backend from: ${backendPath}`);
 
-    if (isDev) {
-      if (fs.existsSync(winVenvPath)) {
-          pythonExecutable = winVenvPath;
-          log('Detected Windows .venv, using isolated Python executable');
-      } else if (fs.existsSync(unixVenvPath)) {
-          pythonExecutable = unixVenvPath;
-          log('Detected Unix .venv, using isolated Python executable');
-      } else {
-          log('No .venv detected, falling back to global Python');
-      }
-  
-      // Use specific python to execute our tailored Waitress startup script
-      djangoProcess = spawn(pythonExecutable, ['run_waitress.py', djangoPort.toString()], {
-        cwd: backendPath,
-        env: env,
-        shell: process.platform === 'win32'
-      });
-    } else {
-      // PROD: Run the fully packaged offline binary explicitly, hiding system shells
-      const exePath = path.join(process.resourcesPath, 'backend.exe');
-      log(`Launching Production Binary Toolkit: ${exePath}`);
-      djangoProcess = spawn(exePath, [djangoPort.toString()], {
-        cwd: process.resourcesPath,
-        env: env,
-        windowsHide: true,
-        shell: false
-      });
-    }
+    djangoProcess = spawn(backendPath, [djangoPort.toString()], {
+      cwd: path.dirname(backendPath),
+      windowsHide: true,
+      env: env
+    });
 
-    const djangoLogFile = fs.createWriteStream(path.join(logPath, 'waitress.log'), { flags: 'a' });
-    
-    djangoProcess.stdout.pipe(djangoLogFile);
-    djangoProcess.stderr.pipe(djangoLogFile);
+    djangoProcess.stdout.on('data', (data) => {
+      log(`Backend: ${data}`);
+    });
+
+    djangoProcess.stderr.on('data', (data) => {
+      log(`Backend Error: ${data}`);
+    });
+
+    djangoProcess.on('error', (err) => {
+      log(`Failed to start backend: ${err}`);
+    });
 
     djangoProcess.on('close', (code) => {
-      log(`Django process exited with code ${code}`);
+      log(`Backend exited with code ${code}`);
       if (mainWindow) {
-        // Redirect to a crash screen if Django dies unexpectedly
         mainWindow.loadFile(path.join(__dirname, 'crash.html'));
-        mainWindow.show(); // Force show the window so it doesn't stay hidden!
+        mainWindow.show();
       }
     });
 

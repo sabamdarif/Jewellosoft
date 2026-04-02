@@ -2,6 +2,8 @@ name: Build & Release JewelloSoft
 
 on:
   push:
+    branches:
+      - '**' # Triggers on each commit to any branch
     tags:
       - 'v*'  # Triggers on version tags like v1.0.0, v1.1.0
   pull_request:
@@ -87,3 +89,13 @@ jobs:
           name: JewelloSoft-Backend-Executable
           path: backend/dist/backend.exe
           retention-days: 30
+
+      # ── Cleanup ──────────────────────────────────────────────────
+      - name: Cleanup build files
+        if: always()
+        shell: bash
+        run: |
+          rm -rf backend/build backend/dist backend/__pycache__
+          rm -rf frontend/node_modules frontend/dist
+          rm -rf desktop/node_modules desktop/dist desktop/build
+          rm -rf ~/.npm ~/.cache/pip
